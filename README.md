@@ -1,0 +1,1 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/2sarqtuplgh48q3y?svg=true)](https://ci.appveyor.com/project/Cancelkam/cartdeliveryrest)
