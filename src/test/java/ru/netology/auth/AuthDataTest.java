@@ -1,80 +1,51 @@
 package ru.netology.auth;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
-import static io.restassured.RestAssured.given;
 
 class AuthDataTest {
 
     static class AuthTest {
-        private static RequestSpecification requestSpec = new RequestSpecBuilder()
-                .setBaseUri("http://localhost")
-                .setPort(9999)
-                .setAccept(ContentType.JSON)
-                .setContentType(ContentType.JSON)
-                .log(LogDetail.ALL)
-                .build();
-
-        @BeforeAll
-        static void setUpAll() {
-            // сам запрос
-            given() // "дано"
-                    .spec(requestSpec) // указываем, какую спецификацию используем
-                    .body(new AuthData("vasya", "password", "active")) // передаём в теле объект, который будет преобразован в JSON
-                .when() // "когда"
-                    .post("/api/system/users") // на какой путь, относительно BaseUri отправляем запрос
-                    .then() // "тогда ожидаем"
-                    .statusCode(200); // код 200 OK
-    }
-        @BeforeAll
-        static void setUpAllSad() {
-        given()
-                    .spec(requestSpec)
-                    .body(new AuthData("lena", "password1", "blocked"))
-                .when() // "когда"
-                    .post("/api/system/users")
-                    .then()
-                    .statusCode(200);
-    }
 
         @Test
-        void shouldBeHappyPath() {
+        void shouldBeActiveUser() {
+            AuthData user = AuthDataGenerator.Generate("active");
             open("http://localhost:9999");
-            $("input[name='login']").setValue("vasya");
-            $("input[name='password']").setValue("password");
+            $("input[name='login']").setValue(user.getLogin());
+            $("input[name='password']").setValue(user.getPassword());
             $("button>.button__content").click();
         }
 
         @Test
-        void shouldBeSadPath() {
+        void shouldBeBlockedUser() {
+            AuthData user = AuthDataGenerator.Generate("blocked");
             open("http://localhost:9999");
-            $("input[name='login']").setValue("lena");
-            $("input[name='password']").setValue("password1");
+            $("input[name='login']").setValue(user.getLogin());
+            $("input[name='password']").setValue(user.getPassword());
             $("button>.button__content").click();
             $(withText("Пользователь заблокирован"));
         }
         @Test
         void shouldBeWrongPassword() {
+            AuthData user = AuthDataGenerator.Generate("active");
+            user.setPassword("123");
             open("http://localhost:9999");
-            $("input[name='login']").setValue("vasya");
-            $("input[name='password']").setValue("password2");
+            $("input[name='login']").setValue(user.getLogin());
+            $("input[name='password']").setValue(user.getPassword());
             $("button>.button__content").click();
             $(withText("Неверно указан логин или пароль"));
         }
 
         @Test
         void shouldBeWronglogin() {
+            AuthData user = AuthDataGenerator.Generate("active");
+            user.setLogin("Вася");
             open("http://localhost:9999");
-            $("input[name='login']").setValue("lena1");
-            $("input[name='password']").setValue("password1");
+            $("input[name='login']").setValue(user.getLogin());
+            $("input[name='password']").setValue(user.getPassword());
             $("button>.button__content").click();
             $(withText("Неверно указан логин или пароль"));
         }
