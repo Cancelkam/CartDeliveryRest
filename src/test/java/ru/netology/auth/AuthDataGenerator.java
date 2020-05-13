@@ -17,13 +17,62 @@ public class AuthDataGenerator {
         return login;
     }
 
+    public static String wrongLoginGenerator(){
+        Faker faker = new Faker(new Locale("ru"));
+        String login = faker.name().firstName();
+        return login;
+    }
+
     public static String passwordGenerator(){
         Faker faker = new Faker(new Locale("en"));
         String password = faker.internet().password(8,15);
         return password;
     }
 
-    private static void createRequest(AuthData user) {
+    public static String wrongPasswordGenerator(){
+        Faker faker = new Faker(new Locale("ru"));
+        String password = faker.internet().password(3,5);
+        return password;
+    }
+
+    public static AuthData generateValidAuthData() {
+        String login = loginGenerator();
+        String password = passwordGenerator();
+        AuthData authData = new AuthData(login,password,"active");
+        userRegistration(authData);
+        return authData;
+    }
+
+    public static AuthData generateBlockedAuthData() {
+        String login = loginGenerator();
+        String password = passwordGenerator();
+        AuthData authData = new AuthData(login,password,"blocked");
+        userRegistration(authData);
+        return authData;
+    }
+
+    public static AuthData generateWrongLoginAuthData() {
+        String login = wrongLoginGenerator();
+        String password = passwordGenerator();
+        AuthData authData = new AuthData(login,password,"active");
+        return authData;
+    }
+
+    public static AuthData generateWrongPasswordAuthData() {
+        String login = loginGenerator();
+        String password = wrongPasswordGenerator();
+        AuthData authData = new AuthData(login,password,"active");
+        return authData;
+    }
+
+    public static AuthData generateWrongLoginAndPasswordAuthData() {
+        String login = wrongLoginGenerator();
+        String password = wrongPasswordGenerator();
+        AuthData authData = new AuthData(login,password,"active");
+        return authData;
+    }
+
+    private static void userRegistration(AuthData user) {
         RequestSpecification requestSpec = new RequestSpecBuilder()
                 .setBaseUri("http://localhost")
                 .setPort(9999)
@@ -39,13 +88,5 @@ public class AuthDataGenerator {
                 .post("/api/system/users")
                 .then()
                 .statusCode(200);
-    }
-    
-    public static AuthData Generate(String status) {
-        String login = loginGenerator();
-        String password = passwordGenerator();
-        AuthData authData = new AuthData(login,password,status);
-        createRequest(authData);
-        return authData;
     }
 }
